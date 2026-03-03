@@ -199,7 +199,7 @@
       }
 
       /* =========================================
-           إعدادات الطباعة والقوالب (مع حل مشكلة التداخل)
+           إعدادات الطباعة والقوالب
            ========================================= */
       @media print {
         .no-print {
@@ -214,7 +214,6 @@
           color: black;
         }
 
-        /* التحكم في ظهور أقسام الطباعة حسب العملية */
         body.printing-invoice #printReportArea {
           display: none !important;
         }
@@ -632,7 +631,7 @@
             <thead class="table-light">
               <tr>
                 <th>الكود</th>
-                <th>النوع</th>
+                <th>النوع/الاسم</th>
                 <th>الطرف الثاني</th>
                 <th>الأصناف والتفاصيل</th>
                 <th>الإجمالي</th>
@@ -860,7 +859,7 @@
         <h3><i class="bi bi-receipt-cutoff me-2"></i> إصدار فاتورة جديدة</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
           <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-2">
               <label class="form-label small fw-bold">كود الفاتورة</label>
               <input
                 type="text"
@@ -871,17 +870,31 @@
               />
             </div>
             <div class="col-md-3">
-              <label class="form-label small fw-bold">نوع الفاتورة</label>
+              <label class="form-label small fw-bold"
+                >توجيه الفاتورة (النوع)</label
+              >
               <select
                 id="invType"
                 class="form-select fw-bold"
                 onchange="toggleCustomerSupplier()"
               >
-                <option value="out">فاتورة مبيعات (للعملاء)</option>
-                <option value="in">فاتورة مشتريات (من الموردين)</option>
+                <option value="out">مبيعات (للعملاء)</option>
+                <option value="in">مشتريات (من الموردين)</option>
               </select>
             </div>
-            <div class="col-md-6" id="customerSelectDiv">
+            <div class="col-md-3">
+              <label class="form-label small fw-bold text-primary"
+                >اسم/عنوان الفاتورة</label
+              >
+              <input
+                type="text"
+                id="invTitle"
+                class="form-control fw-bold border-primary"
+                value="فاتورة مبيعات"
+                placeholder="مثال: عرض سعر، فاتورة ضريبية..."
+              />
+            </div>
+            <div class="col-md-4" id="customerSelectDiv">
               <label class="form-label small fw-bold"
                 >حساب العميل (اختياري)</label
               >
@@ -889,7 +902,7 @@
                 <option value="">بدون تسجيل عميل...</option>
               </select>
             </div>
-            <div class="col-md-6 hidden" id="supplierSelectDiv">
+            <div class="col-md-4 hidden" id="supplierSelectDiv">
               <label class="form-label small fw-bold">حساب المورد</label>
               <select id="invSupplier" class="form-select">
                 <option value="">اختر المورد...</option>
@@ -1053,7 +1066,7 @@
                 </th>
                 <th>الكود</th>
                 <th>التاريخ</th>
-                <th>النوع</th>
+                <th>النوع/الاسم</th>
                 <th>الطرف الثاني</th>
                 <th>الإجمالي</th>
                 <th>الحالة</th>
@@ -1082,7 +1095,7 @@
           </div>
           <div class="modal-body p-4">
             <p class="text-muted small mb-4">
-              أدخل الكمية التي رجعها العميل في الخانة المخصصة ليتم إرجاعها לרصيد
+              أدخل الكمية التي رجعها العميل في الخانة المخصصة ليتم إرجاعها لرصيد
               المخزن فوراً.
             </p>
             <div class="table-responsive border rounded-3">
@@ -1206,7 +1219,7 @@
         <div class="print-top-details">
           <p><strong>رقم الفاتورة:</strong> <span id="printCode"></span></p>
           <p><strong>التاريخ:</strong> <span id="printDate"></span></p>
-          <p><strong>النوع:</strong> <span id="printType"></span></p>
+          <p><strong>النوع/العنوان:</strong> <span id="printType"></span></p>
         </div>
         <div id="printCustomerWrapper">
           <p>
@@ -1273,7 +1286,7 @@
           <tr>
             <th>الكود</th>
             <th>التاريخ</th>
-            <th>النوع</th>
+            <th>اسم/نوع الفاتورة</th>
             <th>العميل/المورد</th>
             <th>الإجمالي</th>
             <th>الحالة (والمرتجعات)</th>
@@ -1342,6 +1355,8 @@
             ? ""
             : "none";
       }
+
+      // دالة تغيير نوع الفاتورة وضبط الاسم الافتراضي
       function toggleCustomerSupplier() {
         const type = document.getElementById("invType").value;
         if (type === "in") {
@@ -1349,11 +1364,13 @@
           document
             .getElementById("supplierSelectDiv")
             .classList.remove("hidden");
+          document.getElementById("invTitle").value = "فاتورة مشتريات/دخول";
         } else {
           document
             .getElementById("customerSelectDiv")
             .classList.remove("hidden");
           document.getElementById("supplierSelectDiv").classList.add("hidden");
+          document.getElementById("invTitle").value = "فاتورة مبيعات";
         }
       }
 
@@ -1394,6 +1411,7 @@
           date: invDate,
           isoDate: isoDate,
           type: "out",
+          title: "فاتورة مبيعات سريعة",
           customerName: customerName,
           subtotal: subtotal,
           discountPercent: 0,
@@ -1477,12 +1495,12 @@
           }
           let typeBadge =
             inv.type === "out"
-              ? '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">مبيعات</span>'
-              : '<span class="badge bg-success bg-opacity-10 text-success border border-success">مشتريات</span>';
+              ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">${inv.title || "مبيعات"}</span>`
+              : `<span class="badge bg-success bg-opacity-10 text-success border border-success">${inv.title || "مشتريات"}</span>`;
           let statusBadge = inv.isReturned
             ? '<span class="badge bg-danger">مرتجع كلي</span>'
             : inv.hasPartialReturn
-              ? `<span class="badge bg-warning text-dark">مرتجع جزئي (${returnedInvoiceTotal} ج)</span>`
+              ? `<span class="badge bg-warning text-dark">مرتجع جزئي (${parseFloat(returnedInvoiceTotal.toFixed(2))} ج)</span>`
               : inv.status === "delivered"
                 ? '<span class="badge bg-success"><i class="bi bi-check"></i> مُسلم</span>'
                 : '<span class="badge bg-warning text-dark">انتظار</span>';
@@ -1656,7 +1674,9 @@
         document.getElementById("printDate").innerText = inv.date;
         document.getElementById("printCode").innerText = inv.code;
         document.getElementById("printType").innerText =
-          inv.type === "out" ? "مبيعات" : "مشتريات/دخول";
+          inv.title ||
+          (inv.type === "out" ? "فاتورة مبيعات" : "فاتورة مشتريات");
+
         let printPhone = "-";
         let printAddress = "-";
         let entityLabel = inv.type === "out" ? "العميل" : "المورد";
@@ -1724,18 +1744,21 @@
       }
 
       function executePrint(templateClass) {
-        document.body.classList.add(templateClass, "printing-invoice");
+        document.body.className = templateClass + " printing-invoice";
         document.getElementById("mainUI").classList.add("hidden");
         document.getElementById("printArea").classList.remove("hidden");
         window.print();
         document.getElementById("printArea").classList.add("hidden");
         document.getElementById("mainUI").classList.remove("hidden");
-        document.body.classList.remove(templateClass, "printing-invoice");
+        document.body.className = "";
       }
 
       function saveAndPrintInvoice() {
         if (currentInvoiceItems.length === 0) return alert("الفاتورة فارغة!");
         const type = document.getElementById("invType").value;
+        const invTitle =
+          document.getElementById("invTitle").value.trim() ||
+          (type === "out" ? "فاتورة مبيعات" : "فاتورة مشتريات");
         let subtotal = 0;
         currentInvoiceItems.forEach((item) => (subtotal += item.subtotal));
         let discountPercent =
@@ -1780,6 +1803,7 @@
           date: invDate,
           isoDate: isoDate,
           type: type,
+          title: invTitle,
           customerName: entityName,
           subtotal: subtotal,
           discountPercent: discountPercent,
@@ -1852,9 +1876,7 @@
         const myModal = bootstrap.Modal.getInstance(
           document.getElementById("invoiceDetailsModal"),
         );
-        if (myModal) myModal.hide(); // إخفاء النافذة قبل الطباعة
-
-        // استخدام setTimeout لضمان اختفاء الـ Modal تماماً قبل فتح شاشة الطباعة
+        if (myModal) myModal.hide();
         setTimeout(() => {
           executePrint(templateClass);
         }, 300);
@@ -1960,7 +1982,6 @@
           .forEach((cb) => (cb.checked = source.checked));
       }
 
-      // طباعة تقرير السجل (معزول تماماً عن تصميم الفواتير وإظهار المرتجع الجزئي بدقة)
       function printReport(mode) {
         let toPrint = [];
         if (mode === "all") toPrint = [...invoicesHistory].reverse();
@@ -1977,9 +1998,8 @@
 
         let html = "";
         toPrint.forEach((inv) => {
-          let typeText = inv.type === "out" ? "مبيعات" : "مشتريات";
-
-          // حساب قيمة المرتجع الجزئي الفعلي
+          let typeText =
+            inv.title || (inv.type === "out" ? "مبيعات" : "مشتريات");
           let returnedValue = 0;
           if (inv.items) {
             inv.items.forEach((item) => {
@@ -1988,7 +2008,6 @@
             if (inv.discountPercent && inv.discountPercent > 0)
               returnedValue = returnedValue * (1 - inv.discountPercent / 100);
           }
-
           let statusText = "";
           if (inv.isReturned) statusText = "مرتجع كلي";
           else if (inv.hasPartialReturn)
@@ -1996,12 +2015,10 @@
           else
             statusText =
               inv.status === "delivered" ? "تم التسليم" : "قيد الانتظار";
-
           html += `<tr><td>${inv.code}</td><td>${inv.date}</td><td>${typeText}</td><td>${inv.customerName}</td><td>${inv.total}</td><td>${statusText}</td></tr>`;
         });
         document.getElementById("printReportItems").innerHTML = html;
 
-        // إعطاء كلاس مخصص لطباعة التقرير عشان ميتداخلش مع الفاتورة
         document.body.classList.add("printing-report");
         document.getElementById("mainUI").classList.add("hidden");
         document.getElementById("printReportArea").classList.remove("hidden");
@@ -2067,10 +2084,8 @@
             .map((inv) => {
               let typeBadge =
                 inv.type === "out"
-                  ? '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">مبيعات</span>'
-                  : '<span class="badge bg-success bg-opacity-10 text-success border border-success">مشتريات</span>';
-
-              // حساب قيمة المرتجع في العرض كمان
+                  ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">${inv.title || "مبيعات"}</span>`
+                  : `<span class="badge bg-success bg-opacity-10 text-success border border-success">${inv.title || "مشتريات"}</span>`;
               let returnedValue = 0;
               if (inv.items) {
                 inv.items.forEach((item) => {
@@ -2080,7 +2095,6 @@
                   returnedValue =
                     returnedValue * (1 - inv.discountPercent / 100);
               }
-
               let statusBadge = inv.isReturned
                 ? '<span class="badge bg-danger">مرتجع كلي</span>'
                 : inv.hasPartialReturn
