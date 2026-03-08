@@ -501,6 +501,7 @@
     </nav>
 
     <div id="mainUI" class="container no-print">
+      <!-- اليومية -->
       <div id="dailyTab" class="tab-content">
         <div
           class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom"
@@ -631,7 +632,7 @@
             <thead class="table-light">
               <tr>
                 <th>الكود</th>
-                <th>النوع/الاسم</th>
+                <th>النوع</th>
                 <th>الطرف الثاني</th>
                 <th>الأصناف والتفاصيل</th>
                 <th>الإجمالي</th>
@@ -644,6 +645,7 @@
         </div>
       </div>
 
+      <!-- العملاء -->
       <div id="customersTab" class="tab-content hidden">
         <h3><i class="bi bi-people-fill me-2"></i> إدارة العملاء</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -710,6 +712,22 @@
             </div>
           </form>
         </div>
+
+        <!-- بحث العملاء -->
+        <div class="position-relative mb-3">
+          <i
+            class="bi bi-search position-absolute top-50 translate-middle-y text-muted"
+            style="right: 15px"
+          ></i>
+          <input
+            type="text"
+            id="searchCustomerList"
+            class="form-control border-primary bg-white shadow-sm pe-5"
+            placeholder="ابحث عن عميل بالاسم أو رقم الهاتف..."
+            onkeyup="filterCustomersTable()"
+          />
+        </div>
+
         <div class="table-responsive border rounded-3">
           <table class="table table-hover text-center align-middle mb-0">
             <thead class="table-light">
@@ -728,6 +746,7 @@
         </div>
       </div>
 
+      <!-- الموردين -->
       <div id="suppliersTab" class="tab-content hidden">
         <h3><i class="bi bi-truck me-2"></i> إدارة الموردين والمصانع</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -780,6 +799,7 @@
         </div>
       </div>
 
+      <!-- الأصناف -->
       <div id="productsTab" class="tab-content hidden">
         <h3><i class="bi bi-boxes me-2"></i> إدارة المخزن والأصناف</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -855,6 +875,7 @@
         </div>
       </div>
 
+      <!-- إنشاء فاتورة -->
       <div id="invoiceTab" class="tab-content hidden">
         <h3><i class="bi bi-receipt-cutoff me-2"></i> إصدار فاتورة جديدة</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -1032,6 +1053,7 @@
         </div>
       </div>
 
+      <!-- السجل -->
       <div id="historyTab" class="tab-content hidden">
         <div
           class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
@@ -1048,10 +1070,54 @@
               class="btn btn-dark btn-sm fw-bold shadow-sm"
               onclick="printReport('all')"
             >
-              <i class="bi bi-printer-fill me-1"></i> طباعة السجل كاملاً
+              <i class="bi bi-printer-fill me-1"></i> طباعة التقرير كاملاً
             </button>
           </div>
         </div>
+
+        <!-- بحث وفلترة السجل -->
+        <div class="row mb-3 g-2">
+          <div class="col-md-4">
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-white"
+                ><i class="bi bi-calendar3"></i
+              ></span>
+              <input
+                type="date"
+                id="historyDateFilter"
+                class="form-control border-primary"
+                onchange="renderData()"
+                title="عرض فواتير يوم محدد"
+              />
+              <button
+                class="btn btn-outline-danger"
+                onclick="
+                  document.getElementById('historyDateFilter').value = '';
+                  renderData();
+                "
+                title="مسح التاريخ لـعرض الكل"
+              >
+                <i class="bi bi-x-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="position-relative">
+              <i
+                class="bi bi-search position-absolute top-50 translate-middle-y text-muted"
+                style="right: 15px"
+              ></i>
+              <input
+                type="text"
+                id="historySearch"
+                class="form-control border-primary bg-white shadow-sm pe-5"
+                placeholder="ابحث برقم الفاتورة، أو اسم العميل، أو عنوان الفاتورة..."
+                onkeyup="renderData()"
+              />
+            </div>
+          </div>
+        </div>
+
         <div class="table-responsive border rounded-3">
           <table class="table table-hover text-center align-middle mb-0">
             <thead class="table-light">
@@ -1069,7 +1135,7 @@
                 <th>النوع/الاسم</th>
                 <th>الطرف الثاني</th>
                 <th>الإجمالي</th>
-                <th>الحالة</th>
+                <th>الحالة (والمرتجعات)</th>
                 <th>إجراءات الإدارة</th>
               </tr>
             </thead>
@@ -1079,6 +1145,7 @@
       </div>
     </div>
 
+    <!-- Modal المرتجع الجزئي -->
     <div class="modal fade" id="partialReturnModal" tabindex="-1">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -1125,6 +1192,7 @@
       </div>
     </div>
 
+    <!-- Modal عرض الفاتورة -->
     <div class="modal fade" id="invoiceDetailsModal" tabindex="-1">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -1178,6 +1246,14 @@
                       0 ج
                     </th>
                   </tr>
+                  <tr id="modalReturnedQtyRow">
+                    <th colspan="4" class="text-end">
+                      عدد القطع المرتجعة الكلي:
+                    </th>
+                    <th id="modalReturnedQty" class="text-danger fw-bold">
+                      0 قطعة
+                    </th>
+                  </tr>
                   <tr>
                     <th colspan="4" class="text-end text-primary">
                       الإجمالي النهائي:
@@ -1212,6 +1288,7 @@
       </div>
     </div>
 
+    <!-- منطقة طباعة الفاتورة -->
     <div id="printArea" class="hidden">
       <div class="invoice-header">
         <h1>ياسمينا</h1>
@@ -1253,6 +1330,10 @@
             </th>
             <th id="printDiscountAmount" class="text-danger">0</th>
           </tr>
+          <tr id="printReturnedQtyRow">
+            <th colspan="3" class="text-end">القطع المرتجعة:</th>
+            <th id="printReturnedQty" class="text-danger">0 قطعة</th>
+          </tr>
           <tr>
             <th colspan="3" class="text-end fs-5">الإجمالي النهائي المستحق:</th>
             <th id="printTotal" class="fs-5 fw-bold">0</th>
@@ -1270,6 +1351,7 @@
       </div>
     </div>
 
+    <!-- منطقة طباعة السجل والتقارير -->
     <div id="printReportArea" class="hidden container mt-4 bg-white p-4">
       <div class="invoice-header">
         <h1>ياسمينا - تقرير السجل المالي</h1>
@@ -1314,6 +1396,7 @@
           .toISOString()
           .split("T")[0];
 
+      // -- دوال البحث والفلترة --
       function filterProductsTable() {
         let filter = document
           .getElementById("searchProductList")
@@ -1329,6 +1412,19 @@
               .includes(filter)
               ? ""
               : "none";
+        }
+      }
+      function filterCustomersTable() {
+        let filter = document
+          .getElementById("searchCustomerList")
+          .value.toLowerCase();
+        let trs = document
+          .getElementById("customersList")
+          .getElementsByTagName("tr");
+        for (let i = 0; i < trs.length; i++) {
+          trs[i].style.display = trs[i].innerText.toLowerCase().includes(filter)
+            ? ""
+            : "none";
         }
       }
       function filterInvoiceProducts() {
@@ -1356,7 +1452,6 @@
             : "none";
       }
 
-      // دالة تغيير نوع الفاتورة وضبط الاسم الافتراضي
       function toggleCustomerSupplier() {
         const type = document.getElementById("invType").value;
         if (type === "in") {
@@ -1460,11 +1555,13 @@
           let invSubtotal = 0;
           let returnedSubtotal = 0;
           let itemsDetails = [];
+          let totalReturnedQty = 0;
           if (inv.items) {
             inv.items.forEach((item) => {
               let netQty = item.qty - (item.returnedQty || 0);
               invSubtotal += netQty * item.price;
               returnedSubtotal += (item.returnedQty || 0) * item.price;
+              totalReturnedQty += item.returnedQty || 0;
               let itemStr = `<span class="fw-bold text-dark">${item.name}</span>`;
               if (item.qty > 1)
                 itemStr += ` <span class="badge bg-secondary ms-1">x${item.qty}</span>`;
@@ -1500,7 +1597,7 @@
           let statusBadge = inv.isReturned
             ? '<span class="badge bg-danger">مرتجع كلي</span>'
             : inv.hasPartialReturn
-              ? `<span class="badge bg-warning text-dark">مرتجع جزئي (${parseFloat(returnedInvoiceTotal.toFixed(2))} ج)</span>`
+              ? `<span class="badge bg-warning text-dark">مرتجع جزئي (${totalReturnedQty} قطعة - ${parseFloat(returnedInvoiceTotal.toFixed(2))} ج)</span>`
               : inv.status === "delivered"
                 ? '<span class="badge bg-success"><i class="bi bi-check"></i> مُسلم</span>'
                 : '<span class="badge bg-warning text-dark">انتظار</span>';
@@ -1716,10 +1813,11 @@
         }
 
         let printHtml = "";
-        inv.items.forEach(
-          (i) =>
-            (printHtml += `<tr><td>${i.name}</td><td>${i.qty}</td><td>${i.price}</td><td>${i.subtotal}</td></tr>`),
-        );
+        let totalRetQty = 0;
+        inv.items.forEach((i) => {
+          printHtml += `<tr><td>${i.name}</td><td>${i.qty}</td><td>${i.price}</td><td>${i.subtotal}</td></tr>`;
+          totalRetQty += i.returnedQty || 0;
+        });
         document.getElementById("printItems").innerHTML = printHtml;
 
         let subtotal = inv.subtotal || inv.total;
@@ -1736,6 +1834,16 @@
         } else {
           document.getElementById("printDiscountRow").style.display = "none";
         }
+
+        if (totalRetQty > 0) {
+          document.getElementById("printReturnedQtyRow").style.display =
+            "table-row";
+          document.getElementById("printReturnedQty").innerText =
+            totalRetQty + " قطعة";
+        } else {
+          document.getElementById("printReturnedQtyRow").style.display = "none";
+        }
+
         document.getElementById("printTotal").innerText = inv.total + " ج.م";
         document.getElementById("printFooterText").innerText =
           inv.type === "out"
@@ -1839,6 +1947,7 @@
         document.getElementById("modalInvCustomer").innerText =
           inv.customerName;
         document.getElementById("modalInvDate").innerText = inv.date;
+
         let discountPercent = inv.discountPercent || 0;
         let subtotal = inv.subtotal || inv.total;
         let discountAmount = (subtotal * discountPercent) / 100;
@@ -1854,13 +1963,26 @@
         } else {
           document.getElementById("modalDiscountRow").style.display = "none";
         }
-        document.getElementById("modalInvTotal").innerText = inv.total + " ج.م";
+
         let html = "";
+        let totalRetQty = 0;
         if (inv.items)
           inv.items.forEach((item) => {
+            totalRetQty += item.returnedQty || 0;
             html += `<tr><td>${item.name}</td><td>${item.qty}</td><td>${item.returnedQty > 0 ? `<span class="badge bg-danger">${item.returnedQty}</span>` : "-"}</td><td>${item.price} ج</td><td class="fw-bold">${item.subtotal} ج</td></tr>`;
           });
         document.getElementById("modalInvItems").innerHTML = html;
+
+        if (totalRetQty > 0) {
+          document.getElementById("modalReturnedQtyRow").style.display =
+            "table-row";
+          document.getElementById("modalReturnedQty").innerText =
+            totalRetQty + " قطعة";
+        } else {
+          document.getElementById("modalReturnedQtyRow").style.display = "none";
+        }
+
+        document.getElementById("modalInvTotal").innerText = inv.total + " ج.م";
         new bootstrap.Modal(
           document.getElementById("invoiceDetailsModal"),
         ).show();
@@ -1984,8 +2106,29 @@
 
       function printReport(mode) {
         let toPrint = [];
-        if (mode === "all") toPrint = [...invoicesHistory].reverse();
-        else {
+
+        // تطبيق نفس فلتر السجل الحالي قبل الطباعة لو العميل عامل بحث
+        let filteredInvoices = [...invoicesHistory];
+        let hDate = document.getElementById("historyDateFilter").value;
+        if (hDate)
+          filteredInvoices = filteredInvoices.filter(
+            (inv) => inv.isoDate === hDate,
+          );
+        let hSearch = document
+          .getElementById("historySearch")
+          .value.toLowerCase();
+        if (hSearch)
+          filteredInvoices = filteredInvoices.filter(
+            (inv) =>
+              inv.code.toLowerCase().includes(hSearch) ||
+              (inv.customerName &&
+                inv.customerName.toLowerCase().includes(hSearch)) ||
+              (inv.title && inv.title.toLowerCase().includes(hSearch)),
+          );
+
+        if (mode === "all") {
+          toPrint = filteredInvoices.reverse();
+        } else {
           let checkboxes = document.querySelectorAll(".invoice-cb:checked");
           if (checkboxes.length === 0) return alert("يرجى التحديد أولاً.");
           let ids = Array.from(checkboxes).map((cb) => parseInt(cb.value));
@@ -1993,28 +2136,32 @@
             .filter((inv) => ids.includes(inv.id))
             .reverse();
         }
+
         document.getElementById("printReportDate").innerText =
           new Date().toLocaleDateString("ar-EG");
-
         let html = "";
         toPrint.forEach((inv) => {
           let typeText =
             inv.title || (inv.type === "out" ? "مبيعات" : "مشتريات");
           let returnedValue = 0;
+          let totalReturnedQty = 0;
           if (inv.items) {
             inv.items.forEach((item) => {
               returnedValue += (item.returnedQty || 0) * item.price;
+              totalReturnedQty += item.returnedQty || 0;
             });
             if (inv.discountPercent && inv.discountPercent > 0)
               returnedValue = returnedValue * (1 - inv.discountPercent / 100);
           }
+
           let statusText = "";
           if (inv.isReturned) statusText = "مرتجع كلي";
           else if (inv.hasPartialReturn)
-            statusText = `مرتجع جزئي (${parseFloat(returnedValue.toFixed(2))} ج.م)`;
+            statusText = `مرتجع جزئي (${totalReturnedQty} قطعة - ${parseFloat(returnedValue.toFixed(2))} ج)`;
           else
             statusText =
               inv.status === "delivered" ? "تم التسليم" : "قيد الانتظار";
+
           html += `<tr><td>${inv.code}</td><td>${inv.date}</td><td>${typeText}</td><td>${inv.customerName}</td><td>${inv.total}</td><td>${statusText}</td></tr>`;
         });
         document.getElementById("printReportItems").innerHTML = html;
@@ -2079,17 +2226,40 @@
         document.getElementById("invCode").value =
           "YAS-" + (invoicesHistory.length + 1001);
 
+        // فلترة السجل بناء على البحث والتاريخ
+        let filteredInvoices = [...invoicesHistory];
+        let hDate = document.getElementById("historyDateFilter").value;
+        if (hDate)
+          filteredInvoices = filteredInvoices.filter(
+            (inv) => inv.isoDate === hDate,
+          );
+
+        let hSearch = document
+          .getElementById("historySearch")
+          .value.toLowerCase();
+        if (hSearch) {
+          filteredInvoices = filteredInvoices.filter(
+            (inv) =>
+              inv.code.toLowerCase().includes(hSearch) ||
+              (inv.customerName &&
+                inv.customerName.toLowerCase().includes(hSearch)) ||
+              (inv.title && inv.title.toLowerCase().includes(hSearch)),
+          );
+        }
+
         document.getElementById("invoicesHistoryList").innerHTML =
-          invoicesHistory
+          filteredInvoices
             .map((inv) => {
               let typeBadge =
                 inv.type === "out"
                   ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">${inv.title || "مبيعات"}</span>`
                   : `<span class="badge bg-success bg-opacity-10 text-success border border-success">${inv.title || "مشتريات"}</span>`;
               let returnedValue = 0;
+              let totalReturnedQty = 0;
               if (inv.items) {
                 inv.items.forEach((item) => {
                   returnedValue += (item.returnedQty || 0) * item.price;
+                  totalReturnedQty += item.returnedQty || 0;
                 });
                 if (inv.discountPercent && inv.discountPercent > 0)
                   returnedValue =
@@ -2098,7 +2268,7 @@
               let statusBadge = inv.isReturned
                 ? '<span class="badge bg-danger">مرتجع كلي</span>'
                 : inv.hasPartialReturn
-                  ? `<span class="badge bg-warning text-dark" style="font-size:0.8rem;">مرتجع جزئي<br>(${parseFloat(returnedValue.toFixed(2))} ج)</span>`
+                  ? `<span class="badge bg-warning text-dark" style="font-size:0.8rem;">مرتجع جزئي<br>(${totalReturnedQty} قطعة - ${parseFloat(returnedValue.toFixed(2))} ج)</span>`
                   : inv.status === "delivered"
                     ? '<span class="badge bg-success"><i class="bi bi-check-all"></i> تم التسليم</span>'
                     : '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> انتظار</span>';
