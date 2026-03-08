@@ -509,7 +509,7 @@
           <h3><i class="bi bi-wallet2 me-2"></i> حركة الخزينة واليومية</h3>
           <div class="d-flex align-items-center bg-light p-2 rounded-3 border">
             <label class="me-2 fw-bold text-muted mb-0"
-              ><i class="bi bi-calendar3"></i> التاريخ:</label
+              ><i class="bi bi-calendar3"></i> عرض يوم:</label
             >
             <input
               type="date"
@@ -528,7 +528,7 @@
           </div>
           <div class="card-body p-4 bg-white">
             <div class="row align-items-end">
-              <div class="col-md-4 mb-3 mb-md-0">
+              <div class="col-md-3 mb-3 mb-md-0">
                 <label class="form-label fw-bold text-muted small"
                   >بحث واختيار الصنف:</label
                 >
@@ -540,7 +540,7 @@
                     type="text"
                     id="quickProductSearch"
                     class="form-control"
-                    placeholder="اكتب اسم القطعة..."
+                    placeholder="بحث..."
                     onkeyup="filterQuickProducts()"
                   />
                 </div>
@@ -561,21 +561,26 @@
                   min="1"
                 />
               </div>
-              <div class="col-md-4 mb-3 mb-md-0">
-                <label class="form-label fw-bold text-muted small"
-                  >اسم العميل (اختياري):</label
+              <div class="col-md-3 mb-3 mb-md-0">
+                <label class="form-label fw-bold text-muted small text-primary"
+                  >تاريخ العملية:</label
                 >
-                <div class="input-group">
-                  <span class="input-group-text bg-white"
-                    ><i class="bi bi-person text-muted"></i
-                  ></span>
-                  <input
-                    type="text"
-                    id="quickCustomer"
-                    class="form-control"
-                    placeholder="عميل طيار، أم أحمد..."
-                  />
-                </div>
+                <input
+                  type="date"
+                  id="quickSaleDate"
+                  class="form-control fw-bold border-primary text-primary"
+                />
+              </div>
+              <div class="col-md-2 mb-3 mb-md-0">
+                <label class="form-label fw-bold text-muted small"
+                  >اسم العميل:</label
+                >
+                <input
+                  type="text"
+                  id="quickCustomer"
+                  class="form-control"
+                  placeholder="عميل طيار..."
+                />
               </div>
               <div class="col-md-2">
                 <button
@@ -704,6 +709,7 @@
               <div class="col-md-2 d-flex align-items-end">
                 <button
                   type="submit"
+                  id="saveCustomerBtn"
                   class="btn btn-primary w-100 fw-bold py-2"
                 >
                   <i class="bi bi-person-plus me-1"></i> حفظ
@@ -713,7 +719,6 @@
           </form>
         </div>
 
-        <!-- بحث العملاء -->
         <div class="position-relative mb-3">
           <i
             class="bi bi-search position-absolute top-50 translate-middle-y text-muted"
@@ -890,17 +895,25 @@
                 title="يتم توليده تلقائياً"
               />
             </div>
-            <div class="col-md-3">
-              <label class="form-label small fw-bold"
-                >توجيه الفاتورة (النوع)</label
+            <div class="col-md-2">
+              <label class="form-label small fw-bold text-primary"
+                >تاريخ الإصدار</label
               >
+              <input
+                type="date"
+                id="invDateInput"
+                class="form-control fw-bold border-primary text-primary"
+              />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold">توجيه الفاتورة</label>
               <select
                 id="invType"
                 class="form-select fw-bold"
                 onchange="toggleCustomerSupplier()"
               >
-                <option value="out">مبيعات (للعملاء)</option>
-                <option value="in">مشتريات (من الموردين)</option>
+                <option value="out">مبيعات (عميل)</option>
+                <option value="in">مشتريات (مورد)</option>
               </select>
             </div>
             <div class="col-md-3">
@@ -915,7 +928,7 @@
                 placeholder="مثال: عرض سعر، فاتورة ضريبية..."
               />
             </div>
-            <div class="col-md-4" id="customerSelectDiv">
+            <div class="col-md-3" id="customerSelectDiv">
               <label class="form-label small fw-bold"
                 >حساب العميل (اختياري)</label
               >
@@ -923,7 +936,7 @@
                 <option value="">بدون تسجيل عميل...</option>
               </select>
             </div>
-            <div class="col-md-4 hidden" id="supplierSelectDiv">
+            <div class="col-md-3 hidden" id="supplierSelectDiv">
               <label class="form-label small fw-bold">حساب المورد</label>
               <select id="invSupplier" class="form-select">
                 <option value="">اختر المورد...</option>
@@ -1046,8 +1059,7 @@
               class="btn btn-primary btn-lg w-100 fw-bold shadow-sm"
               onclick="saveAndPrintInvoice()"
             >
-              <i class="bi bi-printer fs-5 me-2"></i> حفظ وطباعة الفاتورة بالشكل
-              المحدد
+              <i class="bi bi-printer fs-5 me-2"></i> حفظ وطباعة الفاتورة
             </button>
           </div>
         </div>
@@ -1075,7 +1087,6 @@
           </div>
         </div>
 
-        <!-- بحث وفلترة السجل -->
         <div class="row mb-3 g-2">
           <div class="col-md-4">
             <div class="input-group shadow-sm">
@@ -1145,7 +1156,6 @@
       </div>
     </div>
 
-    <!-- Modal المرتجع الجزئي -->
     <div class="modal fade" id="partialReturnModal" tabindex="-1">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -1192,7 +1202,6 @@
       </div>
     </div>
 
-    <!-- Modal عرض الفاتورة -->
     <div class="modal fade" id="invoiceDetailsModal" tabindex="-1">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -1288,7 +1297,6 @@
       </div>
     </div>
 
-    <!-- منطقة طباعة الفاتورة -->
     <div id="printArea" class="hidden">
       <div class="invoice-header">
         <h1>ياسمينا</h1>
@@ -1332,7 +1340,7 @@
           </tr>
           <tr id="printReturnedQtyRow">
             <th colspan="3" class="text-end">القطع المرتجعة:</th>
-            <th id="printReturnedQty" class="text-danger">0 قطعة</th>
+            <th id="printReturnedQty" class="text-danger fw-bold">0 قطعة</th>
           </tr>
           <tr>
             <th colspan="3" class="text-end fs-5">الإجمالي النهائي المستحق:</th>
@@ -1351,7 +1359,6 @@
       </div>
     </div>
 
-    <!-- منطقة طباعة السجل والتقارير -->
     <div id="printReportArea" class="hidden container mt-4 bg-white p-4">
       <div class="invoice-header">
         <h1>ياسمينا - تقرير السجل المالي</h1>
@@ -1389,14 +1396,17 @@
       let currentInvoiceItems = [];
       let currentReturnInvoiceId = null;
       let editingProductId = null;
+      let editingCustomerId = null; // للتعديل على العميل
       let currentlyViewingInvoiceId = null;
 
+      const todayISO = new Date().toISOString().split("T")[0];
       if (!document.getElementById("dailyDate").value)
-        document.getElementById("dailyDate").value = new Date()
-          .toISOString()
-          .split("T")[0];
+        document.getElementById("dailyDate").value = todayISO;
+      if (!document.getElementById("quickSaleDate").value)
+        document.getElementById("quickSaleDate").value = todayISO;
+      if (!document.getElementById("invDateInput").value)
+        document.getElementById("invDateInput").value = todayISO;
 
-      // -- دوال البحث والفلترة --
       function filterProductsTable() {
         let filter = document
           .getElementById("searchProductList")
@@ -1497,9 +1507,14 @@
         product.stock -= qty;
         localStorage.setItem("yasmina_products", JSON.stringify(products));
         const subtotal = qty * product.price;
-        const invDate = new Date().toLocaleDateString("ar-EG");
-        const isoDate = new Date().toISOString().split("T")[0];
+
+        const selectedIsoDate =
+          document.getElementById("quickSaleDate").value ||
+          new Date().toISOString().split("T")[0];
+        const invDate = new Date(selectedIsoDate).toLocaleDateString("ar-EG");
+        const isoDate = selectedIsoDate;
         const code = "Q-" + Date.now().toString().slice(-6);
+
         const newInvoice = {
           id: Date.now(),
           code: code,
@@ -1621,7 +1636,7 @@
       function saveCustomer(e) {
         e.preventDefault();
         const data = {
-          id: Date.now(),
+          id: editingCustomerId ? editingCustomerId : Date.now(),
           name: document.getElementById("custName").value,
           phone: document.getElementById("custPhone").value,
           address: document.getElementById("custAddress").value,
@@ -1630,10 +1645,43 @@
           notes: document.getElementById("custNotes").value,
           dateAdded: new Date().toLocaleDateString("ar-EG"),
         };
-        customers.push(data);
+        if (editingCustomerId) {
+          const index = customers.findIndex((c) => c.id === editingCustomerId);
+          if (index !== -1) {
+            data.dateAdded = customers[index].dateAdded;
+            customers[index] = data;
+          }
+          editingCustomerId = null;
+          document.getElementById("saveCustomerBtn").innerHTML =
+            '<i class="bi bi-person-plus me-1"></i> حفظ';
+          document
+            .getElementById("saveCustomerBtn")
+            .classList.replace("btn-warning", "btn-primary");
+        } else {
+          customers.push(data);
+        }
         localStorage.setItem("yasmina_customers", JSON.stringify(customers));
         document.getElementById("customerForm").reset();
         renderData();
+      }
+
+      function editCustomer(id) {
+        const customer = customers.find((c) => c.id === id);
+        if (customer) {
+          document.getElementById("custName").value = customer.name || "";
+          document.getElementById("custPhone").value = customer.phone || "";
+          document.getElementById("custAddress").value = customer.address || "";
+          document.getElementById("custSocial").value = customer.social || "";
+          document.getElementById("custSize").value = customer.size || "";
+          document.getElementById("custNotes").value = customer.notes || "";
+          editingCustomerId = id;
+          document.getElementById("saveCustomerBtn").innerHTML =
+            '<i class="bi bi-check2-circle me-1"></i> حفظ التعديلات';
+          document
+            .getElementById("saveCustomerBtn")
+            .classList.replace("btn-primary", "btn-warning");
+          document.getElementById("custName").focus();
+        }
       }
       function deleteCustomer(id) {
         if (confirm("حذف العميل نهائياً؟")) {
@@ -1642,6 +1690,7 @@
           renderData();
         }
       }
+
       function saveSupplier(e) {
         e.preventDefault();
         const data = {
@@ -1664,6 +1713,7 @@
           renderData();
         }
       }
+
       function saveProduct(e) {
         e.preventDefault();
         const name = document.getElementById("prodName").value;
@@ -1873,8 +1923,12 @@
           parseFloat(document.getElementById("invDiscount").value) || 0;
         let discountAmount = (subtotal * discountPercent) / 100;
         let finalTotal = parseFloat((subtotal - discountAmount).toFixed(2));
-        const invDate = new Date().toLocaleDateString("ar-EG");
-        const isoDate = new Date().toISOString().split("T")[0];
+
+        const selectedIsoDate =
+          document.getElementById("invDateInput").value ||
+          new Date().toISOString().split("T")[0];
+        const invDate = new Date(selectedIsoDate).toLocaleDateString("ar-EG");
+        const isoDate = selectedIsoDate;
         let code =
           document.getElementById("invCode").value.trim() ||
           "YAS-" + (invoicesHistory.length + 1001);
@@ -1935,6 +1989,9 @@
 
         currentInvoiceItems = [];
         document.getElementById("invDiscount").value = 0;
+        document.getElementById("invDateInput").value = new Date()
+          .toISOString()
+          .split("T")[0];
         renderInvoice();
         renderData();
       }
@@ -2106,8 +2163,6 @@
 
       function printReport(mode) {
         let toPrint = [];
-
-        // تطبيق نفس فلتر السجل الحالي قبل الطباعة لو العميل عامل بحث
         let filteredInvoices = [...invoicesHistory];
         let hDate = document.getElementById("historyDateFilter").value;
         if (hDate)
@@ -2179,7 +2234,7 @@
         document.getElementById("customersList").innerHTML = customers
           .map(
             (c) =>
-              `<tr><td class="fw-bold">${c.name}</td><td>${c.phone}</td><td class="text-muted small">${c.address || "-"}</td><td>${c.social ? `<a href="${c.social}" target="_blank" class="badge bg-primary text-decoration-none">زيارة</a>` : "-"}</td><td><span class="badge bg-light text-dark border">${c.size || "-"}</span></td><td class="text-muted small">${c.notes || "-"}</td><td><button class="btn btn-outline-danger btn-sm" onclick="deleteCustomer(${c.id})"><i class="bi bi-trash"></i></button></td></tr>`,
+              `<tr><td class="fw-bold">${c.name}</td><td>${c.phone}</td><td class="text-muted small">${c.address || "-"}</td><td>${c.social ? `<a href="${c.social}" target="_blank" class="badge bg-primary text-decoration-none">زيارة</a>` : "-"}</td><td><span class="badge bg-light text-dark border">${c.size || "-"}</span></td><td class="text-muted small">${c.notes || "-"}</td><td><button class="btn btn-outline-primary btn-sm me-1" onclick="editCustomer(${c.id})" title="تعديل"><i class="bi bi-pencil"></i></button><button class="btn btn-outline-danger btn-sm" onclick="deleteCustomer(${c.id})"><i class="bi bi-trash"></i></button></td></tr>`,
           )
           .join("");
         document.getElementById("suppliersList").innerHTML = suppliers
@@ -2226,14 +2281,12 @@
         document.getElementById("invCode").value =
           "YAS-" + (invoicesHistory.length + 1001);
 
-        // فلترة السجل بناء على البحث والتاريخ
         let filteredInvoices = [...invoicesHistory];
         let hDate = document.getElementById("historyDateFilter").value;
         if (hDate)
           filteredInvoices = filteredInvoices.filter(
             (inv) => inv.isoDate === hDate,
           );
-
         let hSearch = document
           .getElementById("historySearch")
           .value.toLowerCase();
