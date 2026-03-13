@@ -225,7 +225,6 @@
           margin: 0 auto;
         }
 
-        /* --- القالب الكلاسيكي --- */
         body.template-classic #printArea {
           width: 100%;
           padding: 20px;
@@ -263,7 +262,6 @@
           -webkit-print-color-adjust: exact;
         }
 
-        /* --- القالب المودرن --- */
         body.template-modern #printArea {
           width: 100%;
           padding: 40px;
@@ -330,7 +328,6 @@
           font-size: 20px;
         }
 
-        /* --- قالب البون الحراري 80mm --- */
         @page {
           margin: 0;
         }
@@ -402,7 +399,6 @@
           text-align: center;
         }
 
-        /* --- تنسيق تقرير السجل المالي المطبوع --- */
         #printReportArea .invoice-header h1 {
           font-size: 28px;
           border-bottom: 2px solid #000;
@@ -504,7 +500,6 @@
     </nav>
 
     <div id="mainUI" class="container no-print">
-      <!-- اليومية -->
       <div id="dailyTab" class="tab-content">
         <div
           class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom"
@@ -655,7 +650,6 @@
         </div>
       </div>
 
-      <!-- العملاء -->
       <div id="customersTab" class="tab-content hidden">
         <h3><i class="bi bi-people-fill me-2"></i> إدارة العملاء</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -756,7 +750,6 @@
         </div>
       </div>
 
-      <!-- الموردين -->
       <div id="suppliersTab" class="tab-content hidden">
         <h3><i class="bi bi-truck me-2"></i> إدارة الموردين والمصانع</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -809,7 +802,6 @@
         </div>
       </div>
 
-      <!-- الأصناف -->
       <div id="productsTab" class="tab-content hidden">
         <h3><i class="bi bi-boxes me-2"></i> إدارة المخزن والأصناف</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -885,7 +877,6 @@
         </div>
       </div>
 
-      <!-- إنشاء فاتورة -->
       <div id="invoiceTab" class="tab-content hidden">
         <h3><i class="bi bi-receipt-cutoff me-2"></i> إصدار فاتورة جديدة</h3>
         <div class="card border-0 bg-light p-4 mb-4 rounded-3">
@@ -1084,7 +1075,6 @@
         </div>
       </div>
 
-      <!-- السجل -->
       <div id="historyTab" class="tab-content hidden">
         <div
           class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
@@ -1146,9 +1136,67 @@
               />
             </div>
           </div>
+          <div class="col-12 mt-2">
+            <div class="btn-group w-100 shadow-sm" role="group">
+              <input
+                type="radio"
+                class="btn-check"
+                name="statusFilter"
+                id="sf_all"
+                value="all"
+                autocomplete="off"
+                checked
+                onchange="renderData()"
+              />
+              <label class="btn btn-outline-dark fw-bold" for="sf_all"
+                >الكل</label
+              >
+
+              <input
+                type="radio"
+                class="btn-check"
+                name="statusFilter"
+                id="sf_delivered"
+                value="delivered"
+                autocomplete="off"
+                onchange="renderData()"
+              />
+              <label class="btn btn-outline-success fw-bold" for="sf_delivered"
+                >تم الاستلام ✅</label
+              >
+
+              <input
+                type="radio"
+                class="btn-check"
+                name="statusFilter"
+                id="sf_pending"
+                value="pending"
+                autocomplete="off"
+                onchange="renderData()"
+              />
+              <label
+                class="btn btn-outline-warning text-dark fw-bold"
+                for="sf_pending"
+                >قيد الانتظار ⏳</label
+              >
+
+              <input
+                type="radio"
+                class="btn-check"
+                name="statusFilter"
+                id="sf_returned"
+                value="returned"
+                autocomplete="off"
+                onchange="renderData()"
+              />
+              <label class="btn btn-outline-danger fw-bold" for="sf_returned"
+                >مرتجع (كلي/جزئي) 🔙</label
+              >
+            </div>
+          </div>
         </div>
 
-        <div class="table-responsive border rounded-3">
+        <div class="table-responsive border rounded-3 mt-3">
           <table class="table table-hover text-center align-middle mb-0">
             <thead class="table-light">
               <tr>
@@ -1191,7 +1239,7 @@
           </div>
           <div class="modal-body p-4">
             <p class="text-muted small mb-4">
-              أدخل الكمية التي رجعها العميل في الخانة المخصصة ليتم إرجاعها لرصيد
+              أدخل الكمية التي رجعها العميل في الخانة المخصصة ليتم إرجاعها לרصيد
               المخزن فوراً.
             </p>
             <div class="table-responsive border rounded-3">
@@ -1392,7 +1440,6 @@
       </div>
     </div>
 
-    <!-- منطقة طباعة السجل والتقارير المالية -->
     <div id="printReportArea" class="hidden container mt-4 bg-white p-4">
       <div class="invoice-header">
         <h1>ياسمينا - تقرير السجل المالي</h1>
@@ -1442,7 +1489,6 @@
       if (!document.getElementById("invDateInput").value)
         document.getElementById("invDateInput").value = todayISO;
 
-      // -- دوال البحث والفلترة --
       function filterProductsTable() {
         let filter = document
           .getElementById("searchProductList")
@@ -1498,7 +1544,6 @@
             : "none";
       }
 
-      // فلتر قوائم العملاء والموردين داخل الفاتورة
       function filterInvCustomers() {
         let filter = document
           .getElementById("invCustomerSearch")
@@ -1725,7 +1770,6 @@
         document.getElementById("customerForm").reset();
         renderData();
       }
-
       function editCustomer(id) {
         const customer = customers.find((c) => c.id === id);
         if (customer) {
@@ -1751,7 +1795,6 @@
           renderData();
         }
       }
-
       function saveSupplier(e) {
         e.preventDefault();
         const data = {
@@ -1774,7 +1817,6 @@
           renderData();
         }
       }
-
       function saveProduct(e) {
         e.preventDefault();
         const name = document.getElementById("prodName").value;
@@ -2243,7 +2285,6 @@
           .forEach((cb) => (cb.checked = source.checked));
       }
 
-      // دالة طباعة التقرير مع الإجماليات
       function printReport(mode) {
         let toPrint = [];
         let filteredInvoices = [...invoicesHistory];
@@ -2263,6 +2304,29 @@
                 inv.customerName.toLowerCase().includes(hSearch)) ||
               (inv.title && inv.title.toLowerCase().includes(hSearch)),
           );
+
+        let hStatus = document.querySelector(
+          'input[name="statusFilter"]:checked',
+        ).value;
+        if (hStatus !== "all") {
+          filteredInvoices = filteredInvoices.filter((inv) => {
+            if (hStatus === "returned")
+              return inv.isReturned || inv.hasPartialReturn;
+            if (hStatus === "delivered")
+              return (
+                inv.status === "delivered" &&
+                !inv.isReturned &&
+                !inv.hasPartialReturn
+              );
+            if (hStatus === "pending")
+              return (
+                inv.status === "pending" &&
+                !inv.isReturned &&
+                !inv.hasPartialReturn
+              );
+            return true;
+          });
+        }
 
         if (mode === "all") {
           toPrint = filteredInvoices.reverse();
@@ -2308,7 +2372,6 @@
             statusText =
               inv.status === "delivered" ? "تم التسليم" : "قيد الانتظار";
 
-          // حساب الإجماليات للتقرير
           if (inv.type === "out") totalSales += netTotal;
           else if (inv.type === "in") totalPurchases += netTotal;
 
@@ -2316,21 +2379,7 @@
         });
         document.getElementById("printReportItems").innerHTML = html;
 
-        // بناء ملخص الإجماليات في نهاية التقرير المطبوع
-        let footerHtml = `
-            <tr>
-                <th colspan="4" class="text-end">إجمالي المبيعات المطبوعة (بعد خصم المرتجعات):</th>
-                <th colspan="2" class="text-start text-success fs-6">${parseFloat(totalSales.toFixed(2))} ج.م</th>
-            </tr>
-            <tr>
-                <th colspan="4" class="text-end">إجمالي المشتريات المطبوعة:</th>
-                <th colspan="2" class="text-start text-danger fs-6">${parseFloat(totalPurchases.toFixed(2))} ج.م</th>
-            </tr>
-            <tr>
-                <th colspan="4" class="text-end fs-5">صافي التقرير (المبيعات - المشتريات):</th>
-                <th colspan="2" class="text-start text-primary fs-5 fw-bold">${parseFloat((totalSales - totalPurchases).toFixed(2))} ج.م</th>
-            </tr>
-        `;
+        let footerHtml = `<tr><th colspan="4" class="text-end">إجمالي المبيعات المطبوعة (بعد خصم المرتجعات):</th><th colspan="2" class="text-start text-success fs-6">${parseFloat(totalSales.toFixed(2))} ج.م</th></tr><tr><th colspan="4" class="text-end">إجمالي المشتريات المطبوعة:</th><th colspan="2" class="text-start text-danger fs-6">${parseFloat(totalPurchases.toFixed(2))} ج.م</th></tr><tr><th colspan="4" class="text-end fs-5">صافي التقرير المطبوع (مبيعات - مشتريات):</th><th colspan="2" class="text-start text-primary fs-5 fw-bold">${parseFloat((totalSales - totalPurchases).toFixed(2))} ج.م</th></tr>`;
         document.getElementById("printReportFooter").innerHTML = footerHtml;
 
         document.body.classList.add("printing-report");
@@ -2410,6 +2459,30 @@
           filteredInvoices = filteredInvoices.filter(
             (inv) => inv.isoDate === hDate,
           );
+
+        let hStatus = document.querySelector(
+          'input[name="statusFilter"]:checked',
+        ).value;
+        if (hStatus !== "all") {
+          filteredInvoices = filteredInvoices.filter((inv) => {
+            if (hStatus === "returned")
+              return inv.isReturned || inv.hasPartialReturn;
+            if (hStatus === "delivered")
+              return (
+                inv.status === "delivered" &&
+                !inv.isReturned &&
+                !inv.hasPartialReturn
+              );
+            if (hStatus === "pending")
+              return (
+                inv.status === "pending" &&
+                !inv.isReturned &&
+                !inv.hasPartialReturn
+              );
+            return true;
+          });
+        }
+
         let hSearch = document
           .getElementById("historySearch")
           .value.toLowerCase();
