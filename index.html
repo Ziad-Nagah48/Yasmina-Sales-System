@@ -559,7 +559,7 @@
                   min="1"
                 />
               </div>
-              <div class="col-md-3 mb-3 mb-md-0">
+              <div class="col-md-2 mb-3 mb-md-0">
                 <label class="form-label fw-bold text-muted small text-primary"
                   >تاريخ العملية:</label
                 >
@@ -569,18 +569,13 @@
                   class="form-control fw-bold border-primary text-primary"
                 />
               </div>
-              <div class="col-md-2 mb-3 mb-md-0">
+              <div class="col-md-3 mb-3 mb-md-0">
                 <label class="form-label fw-bold text-muted small"
-                  >اسم العميل:</label
+                  >اسم العميل (اختياري):</label
                 >
-                <input
-                  type="text"
-                  id="quickCustomer"
-                  class="form-control"
-                  placeholder="عميل طيار..."
-                  list="quickCustomersList"
-                />
-                <datalist id="quickCustomersList"></datalist>
+                <select id="quickCustomer" class="form-select">
+                  <option value="">عميل طيار (بدون تسجيل)...</option>
+                </select>
               </div>
               <div class="col-md-2">
                 <button
@@ -1212,7 +1207,7 @@
                 <th>التاريخ</th>
                 <th>النوع/الاسم</th>
                 <th>الطرف الثاني</th>
-                <th>الإجمالي</th>
+                <th>الإجمالي (الصافي)</th>
                 <th>الحالة (والمرتجعات)</th>
                 <th>إجراءات الإدارة</th>
               </tr>
@@ -1372,6 +1367,39 @@
       </div>
     </div>
 
+    <div class="modal fade" id="customerOrdersModal" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-info text-dark">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-clock-history me-2"></i> سجل طلبات العميل:
+              <span id="custModalName" class="text-primary"></span>
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="table-responsive border rounded-3">
+              <table class="table table-hover text-center align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>الكود</th>
+                    <th>التاريخ</th>
+                    <th>الإجمالي (الصافي)</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody id="custModalOrders"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="printArea" class="hidden">
       <div class="invoice-header">
         <h1>ياسمينا</h1>
@@ -1489,6 +1517,7 @@
       if (!document.getElementById("invDateInput").value)
         document.getElementById("invDateInput").value = todayISO;
 
+      // -- دوال البحث والفلترة --
       function filterProductsTable() {
         let filter = document
           .getElementById("searchProductList")
@@ -1605,10 +1634,18 @@
       function addQuickSale() {
         const prodId = document.getElementById("quickProduct").value;
         const qty = parseInt(document.getElementById("quickQty").value);
-        let customerName = document
-          .getElementById("quickCustomer")
-          .value.trim();
-        if (!customerName) customerName = "بيع سريع (طيار)";
+
+        const custId = document.getElementById("quickCustomer").value;
+        let customerName = "بيع سريع (طيار)";
+        let customerId = null;
+        if (custId) {
+          const cust = customers.find((c) => c.id == custId);
+          if (cust) {
+            customerName = cust.name;
+            customerId = cust.id;
+          }
+        }
+
         const product = products.find((p) => p.id == prodId);
         if (!product) return alert("برجاء اختيار صنف!");
         if (qty > product.stock)
@@ -1616,11 +1653,13 @@
         product.stock -= qty;
         localStorage.setItem("yasmina_products", JSON.stringify(products));
         const subtotal = qty * product.price;
+
         const selectedIsoDate =
           document.getElementById("quickSaleDate").value || todayISO;
         const invDate = new Date(selectedIsoDate).toLocaleDateString("ar-EG");
         const isoDate = selectedIsoDate;
         const code = "Q-" + Date.now().toString().slice(-6);
+
         const newInvoice = {
           id: Date.now(),
           code: code,
@@ -1628,6 +1667,7 @@
           isoDate: isoDate,
           type: "out",
           title: "فاتورة مبيعات سريعة",
+          customerId: customerId,
           customerName: customerName,
           subtotal: subtotal,
           discountPercent: 0,
@@ -1795,6 +1835,57 @@
           renderData();
         }
       }
+
+      // عرض سجل العميل
+      function viewCustomerOrders(id) {
+        const customer = customers.find((c) => c.id === id);
+        if (!customer) return;
+        document.getElementById("custModalName").innerText = customer.name;
+
+        let custInvs = invoicesHistory.filter(
+          (inv) =>
+            inv.type === "out" &&
+            (inv.customerId == id ||
+              (!inv.customerId && inv.customerName === customer.name)),
+        );
+        let html = "";
+        custInvs.reverse().forEach((inv) => {
+          let returnedValue = 0;
+          let totalReturnedQty = 0;
+          if (inv.items) {
+            inv.items.forEach((item) => {
+              returnedValue += (item.returnedQty || 0) * item.price;
+              totalReturnedQty += item.returnedQty || 0;
+            });
+            if (inv.discountPercent && inv.discountPercent > 0)
+              returnedValue = returnedValue * (1 - inv.discountPercent / 100);
+          }
+
+          let statusText = "";
+          let netTotal = inv.total;
+          if (inv.isReturned) {
+            statusText = '<span class="badge bg-danger">مرتجع كلي</span>';
+            netTotal = 0;
+          } else if (inv.hasPartialReturn) {
+            netTotal = inv.total - returnedValue;
+            statusText = `<span class="badge bg-warning text-dark">مرتجع جزئي</span>`;
+          } else
+            statusText =
+              inv.status === "delivered"
+                ? '<span class="badge bg-success">تم التسليم</span>'
+                : '<span class="badge bg-warning text-dark">قيد الانتظار</span>';
+
+          html += `<tr><td>${inv.code}</td><td>${inv.date}</td><td class="fw-bold text-success">${parseFloat(netTotal.toFixed(2))} ج</td><td>${statusText}</td></tr>`;
+        });
+        if (html === "")
+          html =
+            '<tr><td colspan="4" class="text-muted py-4">لا توجد طلبات سابقة لهذا العميل</td></tr>';
+        document.getElementById("custModalOrders").innerHTML = html;
+        new bootstrap.Modal(
+          document.getElementById("customerOrdersModal"),
+        ).show();
+      }
+
       function saveSupplier(e) {
         e.preventDefault();
         const data = {
@@ -1817,6 +1908,7 @@
           renderData();
         }
       }
+
       function saveProduct(e) {
         e.preventDefault();
         const name = document.getElementById("prodName").value;
@@ -1931,17 +2023,21 @@
         let printAddress = "-";
         let entityLabel = inv.type === "out" ? "العميل" : "المورد";
         if (inv.type === "out") {
-          const cust = customers.find((c) => c.name === inv.customerName);
+          const cust = inv.customerId
+            ? customers.find((c) => c.id == inv.customerId)
+            : customers.find((c) => c.name === inv.customerName);
           if (cust) {
             printPhone = cust.phone;
             printAddress = cust.address || "-";
           }
         } else {
-          const supp = suppliers.find(
-            (s) =>
-              s.name === inv.customerName ||
-              s.name + " (" + s.company + ")" === inv.customerName,
-          );
+          const supp = inv.customerId
+            ? suppliers.find((s) => s.id == inv.customerId)
+            : suppliers.find(
+                (s) =>
+                  s.name === inv.customerName ||
+                  s.name + " (" + s.company + ")" === inv.customerName,
+              );
           if (supp) {
             printPhone = supp.phone;
           }
@@ -2055,6 +2151,7 @@
         localStorage.setItem("yasmina_products", JSON.stringify(products));
 
         let entityName = "غير مسجل";
+        let entityId = null;
         if (type === "in") {
           const suppId = document.getElementById("invSupplier").value;
           const supp = suppliers.find((s) => s.id == suppId);
@@ -2062,12 +2159,14 @@
             entityName = supp.company
               ? `${supp.name} (${supp.company})`
               : supp.name;
+            entityId = supp.id;
           }
         } else {
           const custId = document.getElementById("invCustomer").value;
           const cust = customers.find((c) => c.id == custId);
           if (cust) {
             entityName = cust.name;
+            entityId = cust.id;
           }
         }
 
@@ -2078,6 +2177,7 @@
           isoDate: isoDate,
           type: type,
           title: invTitle,
+          customerId: entityId,
           customerName: entityName,
           subtotal: subtotal,
           discountPercent: discountPercent,
@@ -2402,7 +2502,7 @@
         document.getElementById("customersList").innerHTML = sortedCustomers
           .map(
             (c) =>
-              `<tr><td class="fw-bold">${c.name}</td><td>${c.phone}</td><td class="text-muted small">${c.address || "-"}</td><td>${c.social ? `<a href="${c.social}" target="_blank" class="badge bg-primary text-decoration-none">زيارة</a>` : "-"}</td><td><span class="badge bg-light text-dark border">${c.size || "-"}</span></td><td class="text-muted small">${c.notes || "-"}</td><td><button class="btn btn-outline-primary btn-sm me-1" onclick="editCustomer(${c.id})" title="تعديل"><i class="bi bi-pencil"></i></button><button class="btn btn-outline-danger btn-sm" onclick="deleteCustomer(${c.id})"><i class="bi bi-trash"></i></button></td></tr>`,
+              `<tr><td class="fw-bold">${c.name}</td><td>${c.phone}</td><td class="text-muted small">${c.address || "-"}</td><td>${c.social ? `<a href="${c.social}" target="_blank" class="badge bg-primary text-decoration-none">زيارة</a>` : "-"}</td><td><span class="badge bg-light text-dark border">${c.size || "-"}</span></td><td class="text-muted small">${c.notes || "-"}</td><td><button class="btn btn-outline-info btn-sm me-1" onclick="viewCustomerOrders(${c.id})" title="سجل الطلبات"><i class="bi bi-clock-history"></i></button><button class="btn btn-outline-primary btn-sm me-1" onclick="editCustomer(${c.id})" title="تعديل"><i class="bi bi-pencil"></i></button><button class="btn btn-outline-danger btn-sm" onclick="deleteCustomer(${c.id})"><i class="bi bi-trash"></i></button></td></tr>`,
           )
           .join("");
         document.getElementById("suppliersList").innerHTML = sortedSuppliers
@@ -2430,7 +2530,6 @@
             )
             .join("");
         document.getElementById("invProduct").innerHTML = productOptions;
-        document.getElementById("quickProduct").innerHTML = productOptions;
 
         document.getElementById("invCustomer").innerHTML =
           '<option value="">بدون تسجيل عميل (طيار)...</option>' +
@@ -2447,8 +2546,16 @@
                 `<option value="${s.id}">${s.name} ${s.company ? "(" + s.company + ")" : ""}</option>`,
             )
             .join("");
-        document.getElementById("quickCustomersList").innerHTML =
-          sortedCustomers.map((c) => `<option value="${c.name}">`).join("");
+
+        // تعديل البيع السريع ليستخدم قائمة العملاء المسجلين
+        document.getElementById("quickProduct").innerHTML = productOptions;
+        document.getElementById("quickCustomer").innerHTML =
+          '<option value="">عميل طيار (بدون تسجيل)...</option>' +
+          sortedCustomers
+            .map(
+              (c) => `<option value="${c.id}">${c.name} - ${c.phone}</option>`,
+            )
+            .join("");
 
         document.getElementById("invCode").value =
           "YAS-" + (invoicesHistory.length + 1001);
@@ -2459,6 +2566,18 @@
           filteredInvoices = filteredInvoices.filter(
             (inv) => inv.isoDate === hDate,
           );
+        let hSearch = document
+          .getElementById("historySearch")
+          .value.toLowerCase();
+        if (hSearch) {
+          filteredInvoices = filteredInvoices.filter(
+            (inv) =>
+              inv.code.toLowerCase().includes(hSearch) ||
+              (inv.customerName &&
+                inv.customerName.toLowerCase().includes(hSearch)) ||
+              (inv.title && inv.title.toLowerCase().includes(hSearch)),
+          );
+        }
 
         let hStatus = document.querySelector(
           'input[name="statusFilter"]:checked',
@@ -2481,19 +2600,6 @@
               );
             return true;
           });
-        }
-
-        let hSearch = document
-          .getElementById("historySearch")
-          .value.toLowerCase();
-        if (hSearch) {
-          filteredInvoices = filteredInvoices.filter(
-            (inv) =>
-              inv.code.toLowerCase().includes(hSearch) ||
-              (inv.customerName &&
-                inv.customerName.toLowerCase().includes(hSearch)) ||
-              (inv.title && inv.title.toLowerCase().includes(hSearch)),
-          );
         }
 
         document.getElementById("invoicesHistoryList").innerHTML =
