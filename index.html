@@ -211,14 +211,12 @@
           font-family: "Tajawal", "Arial", sans-serif;
           color: black;
         }
-
         body.printing-invoice #printReportArea {
           display: none !important;
         }
         body.printing-report #printArea {
           display: none !important;
         }
-
         #printArea,
         #printReportArea {
           direction: rtl;
@@ -416,7 +414,7 @@
           -webkit-print-color-adjust: exact;
         }
         #printReportArea tfoot th {
-          font-size: 16px;
+          font-size: 15px;
           background-color: #f8f9fa !important;
           -webkit-print-color-adjust: exact;
         }
@@ -559,7 +557,7 @@
                   min="1"
                 />
               </div>
-              <div class="col-md-2 mb-3 mb-md-0">
+              <div class="col-md-3 mb-3 mb-md-0">
                 <label class="form-label fw-bold text-muted small text-primary"
                   >تاريخ العملية:</label
                 >
@@ -569,13 +567,18 @@
                   class="form-control fw-bold border-primary text-primary"
                 />
               </div>
-              <div class="col-md-3 mb-3 mb-md-0">
+              <div class="col-md-2 mb-3 mb-md-0">
                 <label class="form-label fw-bold text-muted small"
-                  >اسم العميل (اختياري):</label
+                  >اسم العميل:</label
                 >
-                <select id="quickCustomer" class="form-select">
-                  <option value="">عميل طيار (بدون تسجيل)...</option>
-                </select>
+                <input
+                  type="text"
+                  id="quickCustomer"
+                  class="form-control"
+                  placeholder="عميل طيار..."
+                  list="quickCustomersList"
+                />
+                <datalist id="quickCustomersList"></datalist>
               </div>
               <div class="col-md-2">
                 <button
@@ -712,13 +715,12 @@
             </div>
           </form>
         </div>
-
         <div class="position-relative mb-3">
           <i
             class="bi bi-search position-absolute top-50 translate-middle-y text-muted"
             style="right: 15px"
-          ></i>
-          <input
+          ></i
+          ><input
             type="text"
             id="searchCustomerList"
             class="form-control form-control-lg border-primary bg-white shadow-sm pe-5"
@@ -726,7 +728,6 @@
             onkeyup="filterCustomersTable()"
           />
         </div>
-
         <div class="table-responsive border rounded-3">
           <table class="table table-hover text-center align-middle mb-0">
             <thead class="table-light">
@@ -1191,7 +1192,40 @@
           </div>
         </div>
 
-        <div class="table-responsive border rounded-3 mt-3">
+        <div class="row mt-4 mb-3">
+          <div class="col-md-4">
+            <div class="card border-primary mb-2 shadow-sm">
+              <div
+                class="card-body p-2 text-center bg-primary text-white rounded"
+              >
+                <h6 class="fw-bold mb-1">إجمالي الفواتير (قبل المرتجع)</h6>
+                <h4 class="mb-0" id="histGross">0 ج</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-danger mb-2 shadow-sm">
+              <div
+                class="card-body p-2 text-center bg-danger text-white rounded"
+              >
+                <h6 class="fw-bold mb-1">إجمالي قيمة المرتجعات</h6>
+                <h4 class="mb-0" id="histReturns">0 ج</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-success mb-2 shadow-sm">
+              <div
+                class="card-body p-2 text-center bg-success text-white rounded"
+              >
+                <h6 class="fw-bold mb-1">الصافي الفعلي (بعد المرتجع)</h6>
+                <h4 class="mb-0" id="histNet">0 ج</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive border rounded-3">
           <table class="table table-hover text-center align-middle mb-0">
             <thead class="table-light">
               <tr>
@@ -1234,7 +1268,7 @@
           </div>
           <div class="modal-body p-4">
             <p class="text-muted small mb-4">
-              أدخل الكمية التي رجعها العميل في الخانة المخصصة ليتم إرجاعها לרصيد
+              أدخل الكمية التي رجعها العميل في الخانة المخصصة ليتم إرجاعها لرصيد
               المخزن فوراً.
             </p>
             <div class="table-responsive border rounded-3">
@@ -1451,7 +1485,7 @@
           </tr>
           <tr id="printNetTotalRow" class="hidden">
             <th colspan="3" class="text-end fs-5 text-success">
-              الصافي بعد المرتجع:
+              الصافي المستحق بعد المرتجع:
             </th>
             <th id="printNetTotal" class="fs-5 fw-bold text-success">0</th>
           </tr>
@@ -1517,7 +1551,6 @@
       if (!document.getElementById("invDateInput").value)
         document.getElementById("invDateInput").value = todayISO;
 
-      // -- دوال البحث والفلترة --
       function filterProductsTable() {
         let filter = document
           .getElementById("searchProductList")
@@ -1572,7 +1605,6 @@
             ? ""
             : "none";
       }
-
       function filterInvCustomers() {
         let filter = document
           .getElementById("invCustomerSearch")
@@ -1634,7 +1666,6 @@
       function addQuickSale() {
         const prodId = document.getElementById("quickProduct").value;
         const qty = parseInt(document.getElementById("quickQty").value);
-
         const custId = document.getElementById("quickCustomer").value;
         let customerName = "بيع سريع (طيار)";
         let customerId = null;
@@ -1645,7 +1676,6 @@
             customerId = cust.id;
           }
         }
-
         const product = products.find((p) => p.id == prodId);
         if (!product) return alert("برجاء اختيار صنف!");
         if (qty > product.stock)
@@ -1653,13 +1683,11 @@
         product.stock -= qty;
         localStorage.setItem("yasmina_products", JSON.stringify(products));
         const subtotal = qty * product.price;
-
         const selectedIsoDate =
           document.getElementById("quickSaleDate").value || todayISO;
         const invDate = new Date(selectedIsoDate).toLocaleDateString("ar-EG");
         const isoDate = selectedIsoDate;
         const code = "Q-" + Date.now().toString().slice(-6);
-
         const newInvoice = {
           id: Date.now(),
           code: code,
@@ -1836,12 +1864,10 @@
         }
       }
 
-      // عرض سجل العميل
       function viewCustomerOrders(id) {
         const customer = customers.find((c) => c.id === id);
         if (!customer) return;
         document.getElementById("custModalName").innerText = customer.name;
-
         let custInvs = invoicesHistory.filter(
           (inv) =>
             inv.type === "out" &&
@@ -1860,7 +1886,6 @@
             if (inv.discountPercent && inv.discountPercent > 0)
               returnedValue = returnedValue * (1 - inv.discountPercent / 100);
           }
-
           let statusText = "";
           let netTotal = inv.total;
           if (inv.isReturned) {
@@ -1874,7 +1899,6 @@
               inv.status === "delivered"
                 ? '<span class="badge bg-success">تم التسليم</span>'
                 : '<span class="badge bg-warning text-dark">قيد الانتظار</span>';
-
           html += `<tr><td>${inv.code}</td><td>${inv.date}</td><td class="fw-bold text-success">${parseFloat(netTotal.toFixed(2))} ج</td><td>${statusText}</td></tr>`;
         });
         if (html === "")
@@ -2018,7 +2042,6 @@
         document.getElementById("printType").innerText =
           inv.title ||
           (inv.type === "out" ? "فاتورة مبيعات" : "فاتورة مشتريات");
-
         let printPhone = "-";
         let printAddress = "-";
         let entityLabel = inv.type === "out" ? "العميل" : "المورد";
@@ -2102,7 +2125,6 @@
           document.getElementById("printReturnedQtyRow").style.display = "none";
           document.getElementById("printNetTotalRow").classList.add("hidden");
         }
-
         document.getElementById("printTotal").innerText = inv.total + " ج.م";
         document.getElementById("printFooterText").innerText =
           inv.type === "out"
@@ -2132,7 +2154,6 @@
           parseFloat(document.getElementById("invDiscount").value) || 0;
         let discountAmount = (subtotal * discountPercent) / 100;
         let finalTotal = parseFloat((subtotal - discountAmount).toFixed(2));
-
         const selectedIsoDate =
           document.getElementById("invDateInput").value || todayISO;
         const invDate = new Date(selectedIsoDate).toLocaleDateString("ar-EG");
@@ -2192,13 +2213,11 @@
           "yasmina_invoices",
           JSON.stringify(invoicesHistory),
         );
-
         fillPrintData(newInvoice);
         const templateClass = document.getElementById(
           "printTemplateSelect",
         ).value;
         executePrint(templateClass);
-
         currentInvoiceItems = [];
         document.getElementById("invDiscount").value = 0;
         document.getElementById("invCustomerSearch").value = "";
@@ -2215,13 +2234,11 @@
         document.getElementById("modalInvCustomer").innerText =
           inv.customerName;
         document.getElementById("modalInvDate").innerText = inv.date;
-
         let discountPercent = inv.discountPercent || 0;
         let subtotal = inv.subtotal || inv.total;
         let discountAmount = (subtotal * discountPercent) / 100;
         document.getElementById("modalInvSubtotal").innerText =
           subtotal + " ج.م";
-
         let returnedValue = 0;
         if (discountPercent > 0) {
           document.getElementById("modalDiscountRow").style.display =
@@ -2262,7 +2279,6 @@
           document.getElementById("modalReturnedQtyRow").style.display = "none";
           document.getElementById("modalNetTotalRow").classList.add("hidden");
         }
-
         document.getElementById("modalInvTotal").innerText = inv.total + " ج.م";
         new bootstrap.Modal(
           document.getElementById("invoiceDetailsModal"),
@@ -2378,7 +2394,6 @@
           ).hide();
         }
       }
-
       function toggleAllInvoices(source) {
         document
           .querySelectorAll(".invoice-cb")
@@ -2404,7 +2419,6 @@
                 inv.customerName.toLowerCase().includes(hSearch)) ||
               (inv.title && inv.title.toLowerCase().includes(hSearch)),
           );
-
         let hStatus = document.querySelector(
           'input[name="statusFilter"]:checked',
         ).value;
@@ -2441,7 +2455,6 @@
 
         document.getElementById("printReportDate").innerText =
           new Date().toLocaleDateString("ar-EG");
-
         let html = "";
         let totalSales = 0;
         let totalPurchases = 0;
@@ -2474,11 +2487,9 @@
 
           if (inv.type === "out") totalSales += netTotal;
           else if (inv.type === "in") totalPurchases += netTotal;
-
           html += `<tr><td>${inv.code}</td><td>${inv.date}</td><td>${typeText}</td><td>${inv.customerName}</td><td class="fw-bold">${parseFloat(netTotal.toFixed(2))}</td><td>${statusText}</td></tr>`;
         });
         document.getElementById("printReportItems").innerHTML = html;
-
         let footerHtml = `<tr><th colspan="4" class="text-end">إجمالي المبيعات المطبوعة (بعد خصم المرتجعات):</th><th colspan="2" class="text-start text-success fs-6">${parseFloat(totalSales.toFixed(2))} ج.م</th></tr><tr><th colspan="4" class="text-end">إجمالي المشتريات المطبوعة:</th><th colspan="2" class="text-start text-danger fs-6">${parseFloat(totalPurchases.toFixed(2))} ج.م</th></tr><tr><th colspan="4" class="text-end fs-5">صافي التقرير المطبوع (مبيعات - مشتريات):</th><th colspan="2" class="text-start text-primary fs-5 fw-bold">${parseFloat((totalSales - totalPurchases).toFixed(2))} ج.م</th></tr>`;
         document.getElementById("printReportFooter").innerHTML = footerHtml;
 
@@ -2530,6 +2541,7 @@
             )
             .join("");
         document.getElementById("invProduct").innerHTML = productOptions;
+        document.getElementById("quickProduct").innerHTML = productOptions;
 
         document.getElementById("invCustomer").innerHTML =
           '<option value="">بدون تسجيل عميل (طيار)...</option>' +
@@ -2546,11 +2558,7 @@
                 `<option value="${s.id}">${s.name} ${s.company ? "(" + s.company + ")" : ""}</option>`,
             )
             .join("");
-
-        // تعديل البيع السريع ليستخدم قائمة العملاء المسجلين
-        document.getElementById("quickProduct").innerHTML = productOptions;
-        document.getElementById("quickCustomer").innerHTML =
-          '<option value="">عميل طيار (بدون تسجيل)...</option>' +
+        document.getElementById("quickCustomersList").innerHTML =
           sortedCustomers
             .map(
               (c) => `<option value="${c.id}">${c.name} - ${c.phone}</option>`,
@@ -2602,6 +2610,10 @@
           });
         }
 
+        let totalGross = 0;
+        let totalReturnsVal = 0;
+        let totalNet = 0;
+
         document.getElementById("invoicesHistoryList").innerHTML =
           filteredInvoices
             .map((inv) => {
@@ -2641,11 +2653,24 @@
                 ? `<del class="text-muted small">${inv.total} ج</del><br><span class="fw-bold text-success">${parseFloat(netTotal.toFixed(2))} ج</span>`
                 : `<span class="fw-bold text-success">${inv.total} ج</span>`;
 
+              if (inv.type === "out") {
+                totalGross += inv.total;
+                totalReturnsVal += inv.isReturned ? inv.total : returnedValue;
+                totalNet += netTotal;
+              }
+
               let actionButtons = `<button class="btn btn-outline-primary btn-sm mb-1" title="عرض التفاصيل وإعادة الطباعة" onclick="viewInvoice(${inv.id})"><i class="bi bi-eye"></i></button> <button class="btn btn-outline-success btn-sm mb-1" title="تأكيد التسليم" onclick="toggleInvoiceStatus(${inv.id})"><i class="bi bi-check2"></i></button> <button class="btn btn-outline-secondary btn-sm mb-1" title="عمل مرتجع" onclick="openReturnModal(${inv.id})" ${inv.isReturned || inv.type === "in" ? "disabled" : ""}><i class="bi bi-arrow-counterclockwise"></i></button> <button class="btn btn-outline-danger btn-sm mb-1" title="حذف نهائي" onclick="deleteInvoice(${inv.id})"><i class="bi bi-trash"></i></button>`;
               return `<tr><td><input type="checkbox" class="form-check-input invoice-cb" value="${inv.id}"></td><td><span class="text-muted small">${inv.code}</span></td><td>${inv.date}</td><td>${typeBadge}</td><td class="fw-bold">${inv.customerName}</td><td>${totalHtml}</td><td>${statusBadge}</td><td>${actionButtons}</td></tr>`;
             })
             .reverse()
             .join("");
+
+        document.getElementById("histGross").innerText =
+          parseFloat(totalGross.toFixed(2)) + " ج";
+        document.getElementById("histReturns").innerText =
+          parseFloat(totalReturnsVal.toFixed(2)) + " ج";
+        document.getElementById("histNet").innerText =
+          parseFloat(totalNet.toFixed(2)) + " ج";
 
         if (!document.getElementById("dailyTab").classList.contains("hidden"))
           renderDailyReport();
