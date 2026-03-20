@@ -211,12 +211,14 @@
           font-family: "Tajawal", "Arial", sans-serif;
           color: black;
         }
+
         body.printing-invoice #printReportArea {
           display: none !important;
         }
         body.printing-report #printArea {
           display: none !important;
         }
+
         #printArea,
         #printReportArea {
           direction: rtl;
@@ -397,6 +399,7 @@
           text-align: center;
         }
 
+        /* --- تنسيق طباعة تقرير السجل --- */
         #printReportArea .invoice-header h1 {
           font-size: 28px;
           border-bottom: 2px solid #000;
@@ -715,12 +718,13 @@
             </div>
           </form>
         </div>
+
         <div class="position-relative mb-3">
           <i
             class="bi bi-search position-absolute top-50 translate-middle-y text-muted"
             style="right: 15px"
-          ></i
-          ><input
+          ></i>
+          <input
             type="text"
             id="searchCustomerList"
             class="form-control form-control-lg border-primary bg-white shadow-sm pe-5"
@@ -728,6 +732,7 @@
             onkeyup="filterCustomersTable()"
           />
         </div>
+
         <div class="table-responsive border rounded-3">
           <table class="table table-hover text-center align-middle mb-0">
             <thead class="table-light">
@@ -1193,32 +1198,42 @@
         </div>
 
         <div class="row mt-4 mb-3">
-          <div class="col-md-4">
+          <div class="col-md-3">
             <div class="card border-primary mb-2 shadow-sm">
               <div
                 class="card-body p-2 text-center bg-primary text-white rounded"
               >
-                <h6 class="fw-bold mb-1">إجمالي الفواتير (قبل المرتجع)</h6>
+                <h6 class="fw-bold mb-1">إجمالي الفواتير</h6>
                 <h4 class="mb-0" id="histGross">0 ج</h4>
               </div>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
+            <div class="card border-warning mb-2 shadow-sm">
+              <div
+                class="card-body p-2 text-center bg-warning text-dark rounded"
+              >
+                <h6 class="fw-bold mb-1">قيد الانتظار</h6>
+                <h4 class="mb-0" id="histPending">0 ج</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
             <div class="card border-danger mb-2 shadow-sm">
               <div
                 class="card-body p-2 text-center bg-danger text-white rounded"
               >
-                <h6 class="fw-bold mb-1">إجمالي قيمة المرتجعات</h6>
+                <h6 class="fw-bold mb-1">المرتجعات (كلي/جزئي)</h6>
                 <h4 class="mb-0" id="histReturns">0 ج</h4>
               </div>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <div class="card border-success mb-2 shadow-sm">
               <div
                 class="card-body p-2 text-center bg-success text-white rounded"
               >
-                <h6 class="fw-bold mb-1">الصافي الفعلي (بعد المرتجع)</h6>
+                <h6 class="fw-bold mb-1">الصافي الفعلي</h6>
                 <h4 class="mb-0" id="histNet">0 ج</h4>
               </div>
             </div>
@@ -1551,6 +1566,7 @@
       if (!document.getElementById("invDateInput").value)
         document.getElementById("invDateInput").value = todayISO;
 
+      // -- دوال البحث والفلترة --
       function filterProductsTable() {
         let filter = document
           .getElementById("searchProductList")
@@ -1605,6 +1621,7 @@
             ? ""
             : "none";
       }
+
       function filterInvCustomers() {
         let filter = document
           .getElementById("invCustomerSearch")
@@ -2400,6 +2417,7 @@
           .forEach((cb) => (cb.checked = source.checked));
       }
 
+      // طباعة التقرير المالي بالتفصيل
       function printReport(mode) {
         let toPrint = [];
         let filteredInvoices = [...invoicesHistory];
@@ -2456,7 +2474,10 @@
         document.getElementById("printReportDate").innerText =
           new Date().toLocaleDateString("ar-EG");
         let html = "";
-        let totalSales = 0;
+        let totalSalesGross = 0;
+        let totalSalesReturns = 0;
+        let totalSalesNet = 0;
+        let totalSalesPending = 0;
         let totalPurchases = 0;
 
         toPrint.forEach((inv) => {
@@ -2485,12 +2506,33 @@
             statusText =
               inv.status === "delivered" ? "تم التسليم" : "قيد الانتظار";
 
-          if (inv.type === "out") totalSales += netTotal;
-          else if (inv.type === "in") totalPurchases += netTotal;
+          if (inv.type === "out") {
+            totalSalesGross += inv.total;
+            let currentReturn = inv.isReturned
+              ? inv.total
+              : inv.hasPartialReturn
+                ? returnedValue
+                : 0;
+            totalSalesReturns += currentReturn;
+            totalSalesNet += netTotal;
+            if (inv.status === "pending" && !inv.isReturned)
+              totalSalesPending += netTotal;
+          } else if (inv.type === "in") {
+            totalPurchases += netTotal;
+          }
+
           html += `<tr><td>${inv.code}</td><td>${inv.date}</td><td>${typeText}</td><td>${inv.customerName}</td><td class="fw-bold">${parseFloat(netTotal.toFixed(2))}</td><td>${statusText}</td></tr>`;
         });
         document.getElementById("printReportItems").innerHTML = html;
-        let footerHtml = `<tr><th colspan="4" class="text-end">إجمالي المبيعات المطبوعة (بعد خصم المرتجعات):</th><th colspan="2" class="text-start text-success fs-6">${parseFloat(totalSales.toFixed(2))} ج.م</th></tr><tr><th colspan="4" class="text-end">إجمالي المشتريات المطبوعة:</th><th colspan="2" class="text-start text-danger fs-6">${parseFloat(totalPurchases.toFixed(2))} ج.م</th></tr><tr><th colspan="4" class="text-end fs-5">صافي التقرير المطبوع (مبيعات - مشتريات):</th><th colspan="2" class="text-start text-primary fs-5 fw-bold">${parseFloat((totalSales - totalPurchases).toFixed(2))} ج.م</th></tr>`;
+
+        let footerHtml = `
+            <tr><th colspan="4" class="text-end">إجمالي المبيعات المطبوعة (قبل المرتجع):</th><th colspan="2" class="text-start fs-6">${parseFloat(totalSalesGross.toFixed(2))} ج.م</th></tr>
+            <tr><th colspan="4" class="text-end">إجمالي المرتجعات (كلي وجزئي):</th><th colspan="2" class="text-start text-danger fs-6">${parseFloat(totalSalesReturns.toFixed(2))} ج.م</th></tr>
+            <tr><th colspan="4" class="text-end">مبيعات قيد الانتظار (لم تسلم بعد):</th><th colspan="2" class="text-start text-warning fs-6">${parseFloat(totalSalesPending.toFixed(2))} ج.م</th></tr>
+            <tr><th colspan="4" class="text-end">صافي المبيعات الفعلي:</th><th colspan="2" class="text-start text-success fs-6">${parseFloat(totalSalesNet.toFixed(2))} ج.م</th></tr>
+            <tr><th colspan="4" class="text-end">إجمالي المشتريات:</th><th colspan="2" class="text-start text-danger fs-6">${parseFloat(totalPurchases.toFixed(2))} ج.م</th></tr>
+            <tr><th colspan="4" class="text-end fs-5">الصافي النهائي للتقرير (مبيعات - مشتريات):</th><th colspan="2" class="text-start text-primary fs-5 fw-bold">${parseFloat((totalSalesNet - totalPurchases).toFixed(2))} ج.م</th></tr>
+        `;
         document.getElementById("printReportFooter").innerHTML = footerHtml;
 
         document.body.classList.add("printing-report");
@@ -2559,11 +2601,7 @@
             )
             .join("");
         document.getElementById("quickCustomersList").innerHTML =
-          sortedCustomers
-            .map(
-              (c) => `<option value="${c.id}">${c.name} - ${c.phone}</option>`,
-            )
-            .join("");
+          sortedCustomers.map((c) => `<option value="${c.name}">`).join("");
 
         document.getElementById("invCode").value =
           "YAS-" + (invoicesHistory.length + 1001);
@@ -2613,6 +2651,7 @@
         let totalGross = 0;
         let totalReturnsVal = 0;
         let totalNet = 0;
+        let totalPending = 0;
 
         document.getElementById("invoicesHistoryList").innerHTML =
           filteredInvoices
@@ -2655,8 +2694,16 @@
 
               if (inv.type === "out") {
                 totalGross += inv.total;
-                totalReturnsVal += inv.isReturned ? inv.total : returnedValue;
+                let currentReturn = inv.isReturned
+                  ? inv.total
+                  : inv.hasPartialReturn
+                    ? returnedValue
+                    : 0;
+                totalReturnsVal += currentReturn;
                 totalNet += netTotal;
+                if (inv.status === "pending" && !inv.isReturned) {
+                  totalPending += netTotal;
+                }
               }
 
               let actionButtons = `<button class="btn btn-outline-primary btn-sm mb-1" title="عرض التفاصيل وإعادة الطباعة" onclick="viewInvoice(${inv.id})"><i class="bi bi-eye"></i></button> <button class="btn btn-outline-success btn-sm mb-1" title="تأكيد التسليم" onclick="toggleInvoiceStatus(${inv.id})"><i class="bi bi-check2"></i></button> <button class="btn btn-outline-secondary btn-sm mb-1" title="عمل مرتجع" onclick="openReturnModal(${inv.id})" ${inv.isReturned || inv.type === "in" ? "disabled" : ""}><i class="bi bi-arrow-counterclockwise"></i></button> <button class="btn btn-outline-danger btn-sm mb-1" title="حذف نهائي" onclick="deleteInvoice(${inv.id})"><i class="bi bi-trash"></i></button>`;
@@ -2667,6 +2714,8 @@
 
         document.getElementById("histGross").innerText =
           parseFloat(totalGross.toFixed(2)) + " ج";
+        document.getElementById("histPending").innerText =
+          parseFloat(totalPending.toFixed(2)) + " ج";
         document.getElementById("histReturns").innerText =
           parseFloat(totalReturnsVal.toFixed(2)) + " ج";
         document.getElementById("histNet").innerText =
